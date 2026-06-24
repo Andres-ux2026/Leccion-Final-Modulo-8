@@ -23,8 +23,8 @@ from django.conf.urls.static import static
 
 # los requests llegan a este router y son enrutados a los urls de cada app
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("libros/", include("libros.urls")),
+    path("admin/",admin.site.urls),
+    path("libros/",include("libros.urls")),
     
 
 

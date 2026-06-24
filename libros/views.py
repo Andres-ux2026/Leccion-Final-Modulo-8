@@ -4,6 +4,9 @@ from .models import Libro
 from .forms import LibroForms
 
 # Create your views here.
+def inicio(request):
+    return render(request, "inicio.html")
+
 def crear_libro(request):
     #si el usuario envio el formulario 
     if request.method == "POST":
