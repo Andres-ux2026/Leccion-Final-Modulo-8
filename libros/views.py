@@ -35,7 +35,7 @@ def actualizar_libros(request, id):
     libros = Libro.objects.get(id=id)
 
     if request.method == "POST":
-        form = LibroForms(request.POST,request.FILES, instance=libros)
+        form = LibroForms(request.POST,instance=libros)
         if form.is_valid():
             form.save()
             messages.success(request,"producto actualizado correctamente")
