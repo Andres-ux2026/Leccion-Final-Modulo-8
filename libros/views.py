@@ -50,5 +50,5 @@ def actualizar_libros(request, id):
 def Eliminar_libros(request, id):
     libros = Libro.objects.get(id=id)
     libros.delete()
-    messages.success(request,"mensaje desde la view!!!!!")
+    messages.success(request,"Libro eliminado")
     return redirect("lista_libros")
