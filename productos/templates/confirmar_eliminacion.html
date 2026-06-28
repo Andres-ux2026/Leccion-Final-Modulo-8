@@ -1,22 +1,20 @@
 {% extends 'base.html' %}
-
 {% block title %}Confirmar Eliminación{% endblock %}
-
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card border-danger shadow-sm">
             <div class="card-header bg-danger text-white">
-                <h4 class="mb-0">¿Estás seguro de eliminar este libro?</h4>
+                <h4 class="mb-0">¿Estás seguro de eliminar este producto?</h4>
             </div>
             <div class="card-body text-center">
-                <p class="fs-5">Esta acción no se puede deshacer. Estás a punto de borrar permanentemente el registro.</p>
-                
+                <p class="fs-5">Estás a punto de borrar permanentemente <strong>{{ producto.nombre }}</strong>.</p>
+                <p class="text-muted">Esta acción no se puede deshacer.</p>
                 <form method="POST">
                     {% csrf_token %}
                     <div class="d-flex justify-content-center gap-3 mt-4">
-                        <a href="{% url 'lista_libros' %}" class="btn btn-secondary px-4">No, Cancelar</a>
-                        <button type="submit" class="btn btn-danger px-4">Sí, Eliminar de todas formas</button>
+                        <a href="{% url 'inicio' %}" class="btn btn-secondary px-4">No, Cancelar</a>
+                        <button type="submit" class="btn btn-danger px-4">Sí, Eliminar</button>
                     </div>
                 </form>
             </div>
