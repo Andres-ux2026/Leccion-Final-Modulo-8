@@ -2,7 +2,7 @@
 
 Sistema de e-commerce completo desarrollado en **Django 6.0** con PostgreSQL y autenticación por roles. Incluye catálogo de productos, carrito de compras, flujo de pedidos y panel de administración.
 
-**[Repositorio público](https://github.com/anomalyco/Leccion-Final-Modulo-8)**
+**[Repositorio público](https://github.com/Andres-ux2026/Leccion-Final-Modulo-8)** | **[Demo en Render](https://leccion-final-modulo-8.onrender.com)**
 
 ---
 
