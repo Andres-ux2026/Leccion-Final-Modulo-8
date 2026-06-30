@@ -23,8 +23,10 @@
         {% endif %}
         </div>
         <div class="card-body">
-            <h3>{{ producto.nombre }}</h3>
-            <span class="badge">{% if producto.categoria %}{{ producto.categoria.nombre }}{% endif %}</span>
+            <div class="card-header-area">
+                <h3>{{ producto.nombre }}</h3>
+                <span class="badge">{% if producto.categoria %}{{ producto.categoria.nombre }}{% endif %}</span>
+            </div>
             {% if producto.descripcion %}
                 <p>{{ producto.descripcion|truncatewords:25 }}</p>
             {% endif %}
