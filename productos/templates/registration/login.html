@@ -1,18 +1,27 @@
 {% extends 'base.html' %}
 {% block title %}Iniciar Sesión{% endblock %}
+{% block hero %}{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-header bg-dark text-white">
-                <h4 class="mb-0">Iniciar Sesión</h4>
+<div class="row" style="justify-content:center;">
+    <div class="container" style="max-width:450px;">
+        <div class="card">
+            <div class="card-header" style="background:#42474c;color:#fff;">
+                <h4>Iniciar Sesión</h4>
             </div>
             <div class="card-body">
                 <form method="POST">
                     {% csrf_token %}
-                    {{ form.as_p }}
-                    <div class="d-grid mt-3">
-                        <button type="submit" class="btn btn-dark">Ingresar</button>
+                    {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <ul class="errorlist">{{ field.errors }}</ul>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    <div class="mt-3">
+                        <button type="submit" class="button button-primary w-100">Ingresar</button>
                     </div>
                 </form>
                 <div class="text-center mt-3">

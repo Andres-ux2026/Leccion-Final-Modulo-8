@@ -1,30 +1,31 @@
 {% extends 'base.html' %}
 {% block title %}Crear Producto{% endblock %}
+{% block hero %}{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">Registrar Nuevo Producto</h4>
+<div class="row" style="justify-content:center;">
+    <div class="container" style="max-width:600px;">
+        <div class="card">
+            <div class="card-header" style="background:#f35858;color:#fff;">
+                <h4>Registrar Nuevo Producto</h4>
             </div>
             <div class="card-body">
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     {% for field in form %}
-                    <div class="mb-3">
-                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                         {{ field }}
                         {% if field.help_text %}
-                            <div class="form-text">{{ field.help_text }}</div>
+                            <div style="font-size:0.85em;color:#82878c;margin-top:0.3em;">{{ field.help_text }}</div>
                         {% endif %}
                         {% if field.errors %}
-                            <div class="text-danger small">{{ field.errors }}</div>
+                            <ul class="errorlist">{{ field.errors }}</ul>
                         {% endif %}
                     </div>
                     {% endfor %}
-                    <div class="d-flex justify-content-end gap-2">
-                        <a href="{% url 'inicio' %}" class="btn btn-secondary">Cancelar</a>
-                        <button type="submit" class="btn btn-success">Guardar Producto</button>
+                    <div class="d-flex justify-content-between gap-2 mt-3">
+                        <a href="{% url 'inicio' %}" class="button">Cancelar</a>
+                        <button type="submit" class="button button-primary">Guardar Producto</button>
                     </div>
                 </form>
             </div>

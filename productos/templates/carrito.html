@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load producto_extras %}
+{% block title %}Carrito de Compras{% endblock %}
+{% block hero %}{% endblock %}
+{% block content %}
+<h2 class="mb-3">Tu Carrito de Compras</h2>
+
+{% if items %}
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio Unit.</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            {% if item.producto.imagen %}
+                                <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;">
+                            {% elif item.producto.imagen_url %}
+                                <img src="{{ item.producto.imagen_url }}" alt="{{ item.producto.nombre }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;">
+                            {% endif %}
+                            <span>{{ item.producto.nombre }}</span>
+                        </div>
+                    </td>
+                    <td>${{ item.producto.precio|clp }}</td>
+                    <td>
+                        <form method="POST" action="{% url 'actualizar_carrito' item.producto.id %}" class="d-flex align-items-center gap-2">
+                            {% csrf_token %}
+                            <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1" max="{{ item.producto.stock }}" style="width:70px;">
+                            <button type="submit" class="button">Actualizar</button>
+                        </form>
+                    </td>
+                    <td style="font-weight:600;">${{ item.subtotal|clp }}</td>
+                    <td>
+                        <a href="{% url 'eliminar_del_carrito' item.producto.id %}" class="button" style="color:#e74c3c;">Eliminar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" style="text-align:right;font-weight:600;font-size:1.2em;">Total:</td>
+                    <td style="font-weight:600;font-size:1.2em;color:#2ecc71;">${{ total|clp }}</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between mt-3">
+    <a href="{% url 'inicio' %}" class="button">Seguir Comprando</a>
+    {% if confirmando %}
+    <div class="d-flex gap-2">
+        <a href="{% url 'ver_carrito' %}" class="button">Cancelar</a>
+        <form method="POST" action="{% url 'confirmar_compra' %}">
+            {% csrf_token %}
+            <button type="submit" class="button button-primary" style="font-size:1.1em;">Confirmar Compra</button>
+        </form>
+    </div>
+    {% else %}
+    <a href="{% url 'confirmar_compra' %}" class="button button-primary" style="font-size:1.1em;">Proceder al Pago</a>
+    {% endif %}
+</div>
+{% else %}
+<div class="text-center" style="padding:3em 0;">
+    <h3 class="text-muted">Tu carrito está vacío</h3>
+    <p class="text-muted">Agrega productos desde el catálogo para comenzar.</p>
+    <a href="{% url 'inicio' %}" class="button button-primary mt-3">Ir al Catálogo</a>
+</div>
+{% endif %}
+{% endblock %}

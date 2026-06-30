@@ -1,16 +1,17 @@
 {% extends 'base.html' %}
 {% load producto_extras %}
 {% block title %}Administrar Productos{% endblock %}
+{% block hero %}{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Administrar Productos</h2>
-    <a href="{% url 'crear_producto' %}" class="btn btn-primary">Añadir Nuevo Producto</a>
+    <a href="{% url 'crear_producto' %}" class="button button-primary">Añadir Nuevo Producto</a>
 </div>
 
-<div class="card shadow-sm">
-    <div class="card-body">
-        <table class="table table-striped table-hover align-middle">
-            <thead class="table-dark">
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
                 <tr>
                     <th>ID</th>
                     <th>Imagen</th>
@@ -27,9 +28,9 @@
                     <td>{{ producto.id }}</td>
                     <td>
                         {% if producto.imagen %}
-                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;">
                         {% elif producto.imagen_url %}
-                            <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                            <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;">
                         {% else %}
                             <span class="text-muted">—</span>
                         {% endif %}
@@ -40,12 +41,14 @@
                     <td>
                         {{ producto.stock }}
                         {% if producto.stock == 0 %}
-                            <span class="badge bg-danger">Agotado</span>
+                            <span class="agotado">Agotado</span>
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'actualizar_producto' producto.id %}" class="btn btn-sm btn-warning">Editar</a>
-                        <a href="{% url 'eliminar_producto' producto.id %}" class="btn btn-sm btn-danger">Eliminar</a>
+                        <div class="d-flex gap-1" style="flex-wrap:nowrap;">
+                            <a href="{% url 'actualizar_producto' producto.id %}" class="button" style="padding:0.5em 1em;font-size:0.85em;">Editar</a>
+                            <a href="{% url 'eliminar_producto' producto.id %}" class="button" style="padding:0.5em 1em;font-size:0.85em;color:#e74c3c;">Eliminar</a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
@@ -58,7 +61,7 @@
     </div>
 </div>
 
-<div class="text-center mt-4 mb-3">
-    <a href="{% url 'inicio' %}" class="btn btn-secondary btn-lg px-4 shadow-sm">Volver al Inicio</a>
+<div class="text-center mt-3">
+    <a href="{% url 'inicio' %}" class="button">Volver al Inicio</a>
 </div>
 {% endblock %}

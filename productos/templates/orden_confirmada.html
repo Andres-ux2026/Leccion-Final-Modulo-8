@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load producto_extras %}
+{% block title %}Compra Confirmada{% endblock %}
+{% block hero %}{% endblock %}
+{% block content %}
+<div class="row" style="justify-content:center;">
+    <div class="container" style="max-width:700px;">
+        <div class="card" style="border:solid 2px #2ecc71;">
+            <div class="card-header" style="background:#2ecc71;color:#fff;text-align:center;">
+                <h3>¡Compra Realizada con Éxito!</h3>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#2ecc71" viewBox="0 0 16 16">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                    </svg>
+                </div>
+                <h4 class="text-center">Orden #{{ orden.id }}</h4>
+                <p class="text-center text-muted">Gracias por tu compra, <strong>{{ orden.usuario.username }}</strong>.</p>
+
+                <hr style="border:0;border-top:solid 1px #e8e8e8;margin:1.5em 0;">
+
+                <h5>Resumen de la Orden</h5>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Precio Unit.</th>
+                                <th>Cantidad</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in orden.items.all %}
+                            <tr>
+                                <td>{{ item.producto.nombre }}</td>
+                                <td>${{ item.precio_unitario|clp }}</td>
+                                <td>{{ item.cantidad }}</td>
+                                <td>${{ item.subtotal|clp }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" style="text-align:right;font-weight:600;">Total:</td>
+                                <td style="font-weight:600;color:#2ecc71;">${{ orden.total|clp }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <p class="text-muted" style="font-size:0.85em;">Fecha: {{ orden.fecha|date:"d/m/Y H:i" }}</p>
+
+                <div class="text-center mt-3">
+                    <a href="{% url 'inicio' %}" class="button button-primary">Volver al Catálogo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

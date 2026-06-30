@@ -1,56 +1,107 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <title>{% block title %}Mi Tienda Ecommerce{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'productos/css/main.css' %}" />
 </head>
-<body class="bg-light">
+<body class="{% block body_class %}homepage{% endblock %}">
+    <div id="page-wrapper">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'inicio' %}">Mi Tienda Ecommerce</a>
-            <div class="ms-auto d-flex align-items-center gap-2">
-                {% if user.is_authenticated %}
-                    {% if user.is_staff %}
-                        <a href="{% url 'lista_productos' %}" class="btn btn-outline-light btn-sm">Administrar</a>
-                    {% endif %}
-                    <span class="text-light me-2">{{ user.username }}</span>
-                    <form method="POST" action="{% url 'logout' %}" class="m-0">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-light btn-sm">Cerrar Sesión</button>
-                    </form>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm">Iniciar Sesión</a>
+        <!-- Header -->
+        <div id="header-wrapper">
+            <div id="header-top">
+                <div class="container" id="header-top-inner">
+                    <nav id="nav">
+                        <ul>
+                            {% if user.is_authenticated %}
+                                {% if not user.is_staff %}
+                                    <li>
+                                        <a href="{% url 'ver_carrito' %}">
+                                            Carrito
+                                            {% if carrito_count > 0 %}
+                                                <span class="badge-carrito">{{ carrito_count }}</span>
+                                            {% endif %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% if user.is_staff %}
+                                    <li><a href="{% url 'lista_productos' %}">Administrar</a></li>
+                                {% endif %}
+                                <li>
+                                    <form method="POST" action="{% url 'logout' %}" style="display:inline">
+                                        {% csrf_token %}
+                                        <button type="submit">Cerrar Sesión</button>
+                                    </form>
+                                </li>
+                            {% else %}
+                                <li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            {% block hero %}
+            <section id="hero" class="container">
+                <header>
+                    <h2>Bienvenido a mi tienda Ecommerce</h2>
+                </header>
+                <p>Explora nuestros productos disponibles y realiza tus compras de forma fácil y segura.</p>
+            </section>
+            {% endblock %}
+        </div>
+
+        <!-- Messages -->
+        <div class="wrapper" style="padding:2em 0 0;">
+            <div class="container" id="messages-container">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}info{% endif %}">
+                            {{ message }}
+                            <button type="button" class="btn-close" onclick="this.parentElement.remove()">&times;</button>
+                        </div>
+                    {% endfor %}
                 {% endif %}
             </div>
         </div>
-    </nav>
 
-    <div class="container">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}info{% endif %} alert-dismissible fade show django-alert" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        {% block content %}
+        <!-- Content -->
+        {% block content_wrapper %}
+        <div class="wrapper">
+            <div class="container">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
         {% endblock %}
+
+        <!-- Footer -->
+        <div id="footer-wrapper">
+            <div id="footer" class="container">
+                <header class="major">
+                    <h2>Mi Tienda Ecommerce</h2>
+                    <p>Tu tienda de confianza para productos de calidad.</p>
+                </header>
+                <div class="row" style="justify-content:center;">
+                    <section class="text-center">
+                        <p class="text-muted">© Mi Tienda Ecommerce. Todos los derechos reservados.</p>
+                    </section>
+                </div>
+            </div>
+            <div id="copyright" class="container">
+                <p>&copy; Mi Tienda Ecommerce</p>
+            </div>
+        </div>
+
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'productos/js/main.js' %}"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const alerts = document.querySelectorAll('.django-alert');
+            var alerts = document.querySelectorAll('.alert');
             alerts.forEach(function(alert) {
-                setTimeout(function() {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                }, 3000);
+                setTimeout(function() { alert.style.display = 'none'; }, 4000);
             });
         });
     </script>
