@@ -1,7 +1,9 @@
+from decimal import Decimal
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Producto, Categoria
+from .models import Producto, Categoria, Orden, ItemOrden
 from .forms import ProductoForm
 
 
@@ -102,3 +104,161 @@ def eliminar_producto(request, id):
         messages.success(request, "Producto eliminado correctamente")
         return redirect("inicio")
     return render(request, "confirmar_eliminacion.html", {"producto": producto})
+
+
+def _carrito_items(request):
+    carrito = request.session.get("carrito", {})
+    items = []
+    total = Decimal("0")
+    for prod_id, data in carrito.items():
+        try:
+            producto = Producto.objects.get(id=int(prod_id))
+        except Producto.DoesNotExist:
+            continue
+        subtotal = producto.precio * data["cantidad"]
+        total += subtotal
+        items.append({
+            "producto": producto,
+            "cantidad": data["cantidad"],
+            "subtotal": subtotal,
+        })
+    return items, total
+
+
+def _carrito_count(request):
+    carrito = request.session.get("carrito", {})
+    return sum(item["cantidad"] for item in carrito.values())
+
+
+@login_required
+def ver_carrito(request):
+    items, total = _carrito_items(request)
+    return render(request, "carrito.html", {
+        "items": items,
+        "total": total,
+        "carrito_count": _carrito_count(request),
+    })
+
+
+@login_required
+def agregar_al_carrito(request, id):
+    if request.user.is_staff:
+        messages.error(request, "Los administradores no pueden agregar productos al carrito.")
+        return redirect("inicio")
+    producto = get_object_or_404(Producto, id=id)
+    if producto.stock == 0:
+        messages.error(request, f"{producto.nombre} está agotado.")
+        return redirect("inicio")
+
+    carrito = request.session.get("carrito", {})
+    str_id = str(id)
+
+    if str_id in carrito:
+        nueva_cant = carrito[str_id]["cantidad"] + 1
+        if nueva_cant > producto.stock:
+            messages.error(request, f"No hay suficiente stock de {producto.nombre}.")
+            return redirect("inicio")
+        carrito[str_id]["cantidad"] = nueva_cant
+        messages.success(request, f"Cantidad de {producto.nombre} actualizada a {nueva_cant}.")
+    else:
+        carrito[str_id] = {"cantidad": 1}
+        messages.success(request, f"{producto.nombre} agregado al carrito.")
+
+    request.session["carrito"] = carrito
+    return redirect("inicio")
+
+
+@login_required
+def actualizar_carrito(request, id):
+    str_id = str(id)
+    carrito = request.session.get("carrito", {})
+
+    if str_id not in carrito:
+        messages.error(request, "El producto no está en tu carrito.")
+        return redirect("ver_carrito")
+
+    try:
+        producto = Producto.objects.get(id=id)
+    except Producto.DoesNotExist:
+        del carrito[str_id]
+        request.session["carrito"] = carrito
+        messages.error(request, "El producto ya no está disponible.")
+        return redirect("ver_carrito")
+
+    if request.method == "POST":
+        try:
+            cantidad = int(request.POST.get("cantidad", 1))
+        except (ValueError, TypeError):
+            cantidad = 1
+
+        if cantidad <= 0:
+            del carrito[str_id]
+            messages.success(request, f"{producto.nombre} eliminado del carrito.")
+        elif cantidad > producto.stock:
+            messages.error(request, f"No hay suficiente stock de {producto.nombre}.")
+            return redirect("ver_carrito")
+        else:
+            carrito[str_id]["cantidad"] = cantidad
+            messages.success(request, f"Cantidad de {producto.nombre} actualizada a {cantidad}.")
+
+    request.session["carrito"] = carrito
+    return redirect("ver_carrito")
+
+
+@login_required
+def eliminar_del_carrito(request, id):
+    carrito = request.session.get("carrito", {})
+    str_id = str(id)
+    if str_id in carrito:
+        del carrito[str_id]
+        request.session["carrito"] = carrito
+        messages.success(request, "Producto eliminado del carrito.")
+    return redirect("ver_carrito")
+
+
+@login_required
+def confirmar_compra(request):
+    items, total = _carrito_items(request)
+    if not items:
+        messages.error(request, "Tu carrito está vacío.")
+        return redirect("ver_carrito")
+
+    if request.method == "POST":
+        orden = Orden.objects.create(
+            usuario=request.user,
+            total=total,
+        )
+        for item in items:
+            producto = item["producto"]
+            if producto.stock < item["cantidad"]:
+                messages.error(request, f"Stock insuficiente para {producto.nombre}.")
+                orden.delete()
+                return redirect("ver_carrito")
+            ItemOrden.objects.create(
+                orden=orden,
+                producto=producto,
+                cantidad=item["cantidad"],
+                precio_unitario=producto.precio,
+            )
+            producto.stock -= item["cantidad"]
+            producto.save()
+
+        request.session["carrito"] = {}
+        messages.success(request, "¡Compra realizada con éxito!")
+        return redirect("orden_confirmada", orden_id=orden.id)
+
+    return render(request, "carrito.html", {
+        "items": items,
+        "total": total,
+        "confirmando": True,
+        "carrito_count": _carrito_count(request),
+    })
+
+
+@login_required
+def orden_confirmada(request, orden_id):
+    orden = get_object_or_404(Orden, id=orden_id, usuario=request.user)
+    return render(request, "orden_confirmada.html", {
+        "orden": orden,
+        "carrito_count": _carrito_count(request),
+    })
