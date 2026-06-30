@@ -1,19 +1,170 @@
-# Lección Final Módulo 7 - E-commerce con Django
+# Lección Final Módulo 8 - E-commerce con Django
 
-Sistema de administración de catálogo de productos desarrollado en **Django 6.0** con Bootstrap 5. Incluye operaciones CRUD completas, autenticación de administradores, subida de imágenes y base de datos PostgreSQL.
+Sistema de e-commerce completo desarrollado en **Django 6.0** con PostgreSQL y autenticación por roles. Incluye catálogo de productos, carrito de compras, flujo de pedidos y panel de administración.
 
-> **⚠️ IMPORTANTE:** Para visualizar los botones de CRUD (Crear, Editar, Eliminar) es necesario **iniciar sesión** como administrador. Los usuarios anónimos solo ven el listado de productos en cards.
+**[Repositorio público](https://github.com/anomalyco/Leccion-Final-Modulo-8)**
 
 ---
 
-## Credenciales de Administrador
+## Requisitos e Instalación
 
-| Campo | Valor |
+### Requisitos previos
+- Python 3.12+
+- Docker y Docker Compose (para PostgreSQL)
+
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/anomalyco/Leccion-Final-Modulo-8.git
+cd Leccion-Final-Modulo-8
+```
+
+### 2. Crear y activar entorno virtual
+```bash
+python -m venv venv
+
+# Linux / macOS
+source venv/bin/activate
+
+# Windows
+venv\Scripts\activate
+```
+
+### 3. Instalar dependencias
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Levantar base de datos (PostgreSQL con Docker)
+```bash
+docker compose up -d db
+```
+
+### 5. Ejecutar migraciones
+```bash
+python manage.py migrate
+```
+
+### 6. Iniciar servidor
+```bash
+python manage.py runserver
+```
+
+> Los productos de demostración se crean automáticamente al cargar la página principal si la base de datos está vacía.
+
+---
+
+## Rutas Principales
+
+### Públicas (sin autenticación)
+
+| Ruta | Descripción |
 |---|---|
-| **Usuario** | `admin` |
-| **Contraseña** | `holamundo` |
+| `GET /products/` | Catálogo de productos |
+| `GET /accounts/login/` | Inicio de sesión |
 
-Accede a `/accounts/login/` para iniciar sesión.
+### Cliente (autenticado)
+
+| Ruta | Descripción |
+|---|---|
+| `GET /products/cart/` | Carrito de compras |
+| `GET /products/cart/add/<id>/` | Agregar producto al carrito |
+| `POST /products/cart/update/<id>/` | Actualizar cantidad |
+| `GET /products/cart/remove/<id>/` | Eliminar producto del carrito |
+| `GET/POST /products/cart/checkout/` | Confirmar compra |
+| `GET /products/order/<id>/` | Detalle de orden |
+
+### Administrador
+
+| Ruta | Descripción |
+|---|---|
+| `GET /products/list/` | Tabla administrativa de productos |
+| `GET/POST /products/create/` | Crear producto |
+| `GET/POST /products/edit/<id>/` | Editar producto |
+| `GET/POST /products/delete/<id>/` | Eliminar producto |
+| `GET /admin/` | Panel Django admin |
+
+---
+
+## Credenciales de Prueba
+
+| Rol | Usuario | Contraseña |
+|---|---|---|
+| **Administrador** | `admin` | `holamundo` |
+| **Cliente** | `cliente` | `holamundo123` |
+
+- **Admin**: Accede a `/products/list/` para gestión CRUD y a `/admin/` para el panel Django.
+- **Cliente**: Navega el catálogo, agrega productos al carrito y realiza compras.
+
+---
+
+## Despliegue en Render (Free Tier)
+
+### Requisitos
+- Repositorio en GitHub (ya vinculado)
+- Cuenta gratuita en [render.com](https://render.com)
+
+### Pasos
+
+1. **Conecta tu repositorio**: En Render, crea un **Web Service** vinculado a tu fork/clone de este repo.
+
+2. **Crea una base de datos PostgreSQL**: Ve a **Dashboard > Databases > New PostgreSQL**, elige el plan **Free**.
+
+3. **Configura el Web Service**:
+   - **Build Command**: `./build.sh`
+   - **Start Command**: `gunicorn conf.wsgi:application --workers 2 --worker-class sync --timeout 120`
+   - **Plan**: Free
+
+4. **Variables de entorno** (Render las auto-asigna desde `render.yaml` o créalas manualmente):
+   - `DATABASE_URL`: conectar desde la base de datos creada
+   - `DJANGO_SECRET_KEY`: generar un valor seguro
+   - `DJANGO_DEBUG`: `False`
+   - `DJANGO_ALLOWED_HOSTS`: `.onrender.com,localhost`
+   - `PYTHON_VERSION`: `3.12.8`
+
+5. **Desplegar**: Render ejecutará `build.sh` (instala dependencias, collectstatic, migraciones).
+
+6. **Crear usuarios de prueba** (después del despliegue):
+   ```bash
+   # Conectarse a Render Shell o usar django manage.py shell
+   python manage.py createsuperuser --username=admin --email=admin@example.com
+   python manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_user('cliente', 'cliente@example.com', 'holamundo123')"
+   ```
+
+> **Nota**: El plan free de Render "duerme" el servicio tras 15 min de inactividad. La primera solicitud puede demorar hasta 90 segundos mientras "despierta". La base de datos PostgreSQL free tiene 1 GB de almacenamiento.
+
+---
+
+## Funcionalidades Implementadas (MVP Final)
+
+### Autenticación y acceso
+- **Cliente**: Inicia sesión, navega el catálogo y opera el carrito de compras.
+- **Administrador**: Inicia sesión, accede al panel de administración de Django y al CRUD de productos.
+
+### Catálogo y persistencia
+- Catálogo de productos mostrado desde la base de datos (ORM de Django).
+- Productos persistidos y editables (creación/edición/eliminación) solo por administradores.
+- Seed automático: si la base de datos está vacía, se crean 20 productos de demostración.
+
+### Carrito y compra (flujo completo)
+- **Carrito funcional** para clientes autenticados:
+  - Agregar productos
+  - Quitar productos
+  - Actualizar cantidades
+  - Mostrar subtotales y total correcto
+- **Confirmación de compra**:
+  - Registro de orden (pedido) con sus ítems
+  - Asociación de la orden al usuario autenticado
+  - Reducción de stock al confirmar la compra
+
+### Vistas y navegación
+- Frontend consistente con Bootstrap 5.
+- Navegación clara entre: catálogo, carrito, login/logout y administración de productos.
+- Navbar responsive con contador de items en el carrito.
+
+### Validaciones y mensajes
+- Validaciones en formularios (precio > 0, campos requeridos).
+- Validaciones en carrito (stock suficiente, cantidades > 0).
+- Mensajes claros de éxito/error con auto-dismiss (3 segundos).
 
 ---
 
@@ -37,10 +188,6 @@ Accede a `/accounts/login/` para iniciar sesión.
 
 | Campo | Tipo | Restricciones | Descripción |
 |---|---|---|---|
-### `Producto` — `productos/models.py`
-
-| Campo | Tipo | Restricciones | Descripción |
-|---|---|---|---|
 | `id` | `BigAutoField` | PK, auto | Identificador único |
 | `categoria` | `ForeignKey(Categoria)` | null=True, on_delete=SET_NULL | Relación muchos-a-uno con Categoria |
 | `nombre` | `CharField` | max_length=100, obligatorio | Nombre del producto |
@@ -57,147 +204,54 @@ Accede a `/accounts/login/` para iniciar sesión.
 | `id` | `BigAutoField` | PK, auto | Identificador único |
 | `nombre` | `CharField` | max_length=50, obligatorio | Nombre de la categoría |
 
-**Relaciones:** Un `Categoria` tiene muchos `Producto` (one-to-many vía `ForeignKey`).
+### `Orden` — `productos/models.py` (nuevo en Módulo 8)
+
+| Campo | Tipo | Restricciones | Descripción |
+|---|---|---|---|
+| `id` | `BigAutoField` | PK, auto | Identificador único |
+| `usuario` | `ForeignKey(User)` | on_delete=CASCADE | Usuario que realizó la compra |
+| `fecha` | `DateTimeField` | auto_now_add=True | Fecha y hora de la compra |
+| `total` | `DecimalField` | max_digits=12, decimal_places=2 | Total de la orden |
+
+### `ItemOrden` — `productos/models.py` (nuevo en Módulo 8)
+
+| Campo | Tipo | Restricciones | Descripción |
+|---|---|---|---|
+| `id` | `BigAutoField` | PK, auto | Identificador único |
+| `orden` | `ForeignKey(Orden)` | on_delete=CASCADE, related_name="items" | Orden asociada |
+| `producto` | `ForeignKey(Producto)` | on_delete=SET_NULL, null=True | Producto comprado |
+| `cantidad` | `IntegerField` | — | Cantidad comprada |
+| `precio_unitario` | `DecimalField` | max_digits=10, decimal_places=2 | Precio al momento de la compra |
+
+**Relaciones:**
+- `Categoria` → `Producto` (1:N)
+- `User` → `Orden` (1:N)
+- `Orden` → `ItemOrden` (1:N)
+- `Producto` → `ItemOrden` (1:N)
 
 **Validaciones:**
 - `precio` debe ser mayor a 0 (validación en `ProductoForm.clean_precio`)
 - `nombre` es obligatorio
-- Si no se provee imagen, se muestra un placeholder
+- Stock suficiente al agregar al carrito y al confirmar compra
+- Cantidad > 0 en el carrito
 
 ---
 
-## Rutas del Módulo de Administración
-
-### Públicas (sin autenticación)
-
-| Ruta | Vista | Descripción |
-|---|---|---|
-| `GET /products/` | `inicio` | Página principal con productos en cards |
-| `GET /accounts/login/` | Django Auth | Formulario de inicio de sesión |
-
-### Protegidas (requiere admin)
-
-| Ruta | Vista | Descripción |
-|---|---|---|
-| `GET/POST /products/list/` | `lista_productos` | Tabla administrativa de productos |
-| `GET/POST /products/create/` | `crear_producto` | Formulario de creación |
-| `GET/POST /products/edit/<id>/` | `actualizar_producto` | Formulario de edición |
-| `GET/POST /products/delete/<id>/` | `eliminar_producto` | Confirmación y eliminación |
-| `GET /products/logout/` | Django Auth | Cerrar sesión |
-| `GET /admin/` | Django Admin | Panel administrativo de Django |
-
----
-
-## Pasos para Ejecutar el Proyecto
-
-### Requisitos previos
-
-- Python 3.12+
-- Docker y Docker Compose (para PostgreSQL)
-
-### 1. Clonar el repositorio
-
+## Ejecutar Tests
 ```bash
-git clone <URL_DEL_REPOSITORIO>
-cd Leccion-Final-Modulo-7
+python manage.py test productos -v 2
 ```
 
-### 2. Crear y activar entorno virtual
-
-```bash
-python -m venv venv
-
-# Linux / macOS
-source venv/bin/activate
-
-# Windows
-venv\Scripts\activate
-```
-
-### 3. Instalar dependencias
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Levantar la base de datos (PostgreSQL con Docker)
-
-```bash
-docker compose up -d db
-```
-
-Esto inicia PostgreSQL en el puerto `5432` con las credenciales configuradas.
-
-### 5. Ejecutar migraciones
-
-```bash
-python manage.py migrate
-```
-
-### 6. Crear superusuario (admin)
-
-```bash
-python manage.py createsuperuser
-```
-
-Sigue las instrucciones interactivas. También puedes usar:
-```bash
-DJANGO_SUPERUSER_PASSWORD="holamundo" python manage.py createsuperuser --username=admin --email=admin@example.com --noinput
-```
-
-### 7. Iniciar servidor de desarrollo
-
-```bash
-python manage.py runserver
-```
-
-### 8. Acceder a la aplicación
-
-- **Tienda pública:** http://localhost:8000/products/
-- **Login admin:** http://localhost:8000/accounts/login/
-- **Panel Django admin:** http://localhost:8000/admin/
-
-> Los productos de demostración se crean automáticamente al cargar `/products/` si la base de datos está vacía.
-
----
-
-## Evidencias
-
-### Listado de productos (vista pública)
-
-Al ingresar a `/products/` se muestran los productos en cards con imagen, nombre, precio y stock. Sin iniciar sesión solo se visualiza el catálogo.
-
-### Formulario de creación
-
-Accesible en `/products/create/` (requiere login como admin). Formulario alineado con Bootstrap que incluye: nombre, descripción, precio, stock, imagen (archivo) e imagen URL.
-
-### Formulario de edición
-
-Accesible en `/products/edit/<id>/`. Misma estructura que el formulario de creación pero precargado con los datos del producto existente.
-
-### Confirmación de eliminación
-
-Al hacer clic en "Eliminar" se muestra una página de confirmación antes de borrar definitivamente el producto.
-
----
-
-## Capturas de pantalla
-
-### Listado de productos (vista pública)
-
-![Listado de productos](capturas/listado.png)
-
-### Formulario de creación
-
-![Formulario de creación](capturas/crear.png)
-
-### Formulario de edición
-
-![Formulario de edición](capturas/editar.png)
-
-### Confirmación de eliminación
-
-![Confirmación de eliminación](capturas/eliminar.png)
+El proyecto incluye **48 tests** que cubren:
+- Modelos (Categoria, Producto, Orden, ItemOrden)
+- Vistas públicas (catálogo, login)
+- Autenticación y roles (admin, cliente, anónimo)
+- CRUD de productos (crear, editar, eliminar)
+- Carrito de compras (agregar, actualizar, eliminar, stock)
+- Flujo de orden (confirmar compra, detalle, permisos)
+- Formularios (validación de precio)
+- Templates y contexto (navbar, botones, contador)
+- Context processor (carrito_count)
 
 ---
 
@@ -209,11 +263,12 @@ Al hacer clic en "Eliminar" se muestra una página de confirmación antes de bor
 │   ├── urls.py
 │   └── wsgi.py
 ├── productos/              # Aplicación principal
-│   ├── models.py           # Modelo Producto
-│   ├── views.py            # Vistas CRUD + seed
+│   ├── models.py           # Modelos: Producto, Categoria, Orden, ItemOrden
+│   ├── views.py            # Vistas: CRUD, carrito, ordenes
 │   ├── forms.py            # Formulario con validaciones
 │   ├── urls.py             # Rutas de la aplicación
 │   ├── admin.py            # Registro en admin Django
+│   ├── context_processors.py # Context processor para carrito_count
 │   ├── templatetags/
 │   │   └── producto_extras.py  # Filtro clp (formato precios)
 │   └── templates/
@@ -223,9 +278,13 @@ Al hacer clic en "Eliminar" se muestra una página de confirmación antes de bor
 │       ├── crear_producto.html
 │       ├── actualizar_producto.html
 │       ├── confirmar_eliminacion.html
+│       ├── carrito.html          # (nuevo) Carrito de compras
+│       ├── orden_confirmada.html # (nuevo) Confirmación de orden
 │       └── registration/
 │           └── login.html
 ├── media/                  # Archivos subidos (imágenes)
+├── capturas/               # Capturas de pantalla
+├── estilo/                 # Archivos de diseño (PDF, HTML, CSS)
 ├── docker-compose.yml      # PostgreSQL + pgAdmin
 ├── Dockerfile
 ├── manage.py

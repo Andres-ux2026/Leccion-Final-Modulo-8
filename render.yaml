@@ -1,0 +1,39 @@
+databases:
+  - name: mi-django-db
+    databaseName: mi_django_db
+    user: mi_usuario
+    region: oregon
+    plan: free
+
+services:
+  - type: web
+    name: leccion-final-modulo-8
+    region: oregon
+    plan: free
+    branch: main
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn conf.wsgi:application --workers 2 --worker-class sync --timeout 120"
+    envVarGroups:
+      - key: django
+    healthCheckPath: /products/
+    domains:
+      - leccion-final-modulo-8.onrender.com
+
+envVarGroups:
+  - name: django
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mi-django-db
+          property: connectionString
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_ALLOWED_HOSTS
+        value: "localhost,127.0.0.1,.onrender.com"
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: RENDER
+        value: "true"
