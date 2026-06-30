@@ -315,14 +315,20 @@ p, ul, ol, dl, table { margin-bottom: 1.5em; }
 }
 
 .product-card .card-body .card-header-area {
-    min-height: 5.5em;
+    height: 6em;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .product-card .card-body .card-header-area h3 {
-    margin: 0 0 0.5em 0;
+    margin: 0 0 0.35em 0;
     font-size: 1.2em;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .product-card .card-body .badge {
@@ -734,7 +740,7 @@ table tbody tr:nth-child(2n+1) {
     .table-wrapper td, .table-wrapper th { white-space: nowrap; padding: 0.5em; }
 
     .product-card .card-body { padding: 1em; }
-    .product-card .card-body .card-header-area { min-height: 4em; }
+    .product-card .card-body .card-header-area { height: 5em; }
     .product-card .card-body .card-header-area h3 { font-size: 1em; }
     .product-card .card-body .price { font-size: 1.1em; }
     .product-card img, .product-card .img-wrap { height: 160px; }
