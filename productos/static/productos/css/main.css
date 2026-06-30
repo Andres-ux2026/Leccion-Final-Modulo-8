@@ -683,11 +683,6 @@ table tbody tr:nth-child(2n+1) {
         right: 0;
     }
 
-    body.navPanel-visible #page-wrapper {
-        transform: translateX(-4em);
-        transition: transform 0.3s ease-in-out;
-    }
-
     #navPanel .link {
         display: block;
         color: #fff;

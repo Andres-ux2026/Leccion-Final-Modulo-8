@@ -56,7 +56,7 @@
 
         navButton.addEventListener('click', function(e) {
             e.preventDefault();
-            doc.classList.toggle('navPanel-visible');
+            document.body.classList.toggle('navPanel-visible');
         });
     }
 })();
