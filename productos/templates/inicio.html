@@ -24,9 +24,7 @@
         </div>
         <div class="card-body">
             <h3>{{ producto.nombre }}</h3>
-            {% if producto.categoria %}
-                <span class="badge">{{ producto.categoria.nombre }}</span>
-            {% endif %}
+            <span class="badge">{% if producto.categoria %}{{ producto.categoria.nombre }}{% endif %}</span>
             {% if producto.descripcion %}
                 <p>{{ producto.descripcion|truncatewords:25 }}</p>
             {% endif %}

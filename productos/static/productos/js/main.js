@@ -14,19 +14,42 @@
         navPanel.id = 'navPanel';
         var nav = document.getElementById('nav');
         if (nav) {
-            var links = nav.querySelectorAll('a, button, span');
-            links.forEach(function(link) {
-                var clone = document.createElement('a');
-                clone.className = 'link depth-0';
-                clone.textContent = link.textContent.trim();
-                if (link.tagName === 'A' && link.getAttribute('href')) {
+            var items = nav.querySelectorAll('li');
+            items.forEach(function(li) {
+                var link = li.querySelector('a');
+                var button = li.querySelector('button');
+                var span = li.querySelector('span');
+                if (link) {
+                    var clone = document.createElement('a');
+                    clone.className = 'link depth-0';
+                    clone.textContent = link.textContent.trim();
                     clone.href = link.getAttribute('href');
-                } else if (link.tagName === 'BUTTON') {
+                    navPanel.appendChild(clone);
+                } else if (button) {
+                    var clone = document.createElement('a');
+                    clone.className = 'link depth-0';
+                    clone.textContent = button.textContent.trim();
                     clone.href = '#';
-                } else if (link.tagName === 'FORM') {
-                    return;
+                    clone.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var form = button.closest('form');
+                        if (form) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'csrfmiddlewaretoken';
+                            input.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                            form.appendChild(input);
+                            form.submit();
+                        }
+                    });
+                    navPanel.appendChild(clone);
+                } else if (span) {
+                    var clone = document.createElement('span');
+                    clone.className = 'link depth-0';
+                    clone.textContent = span.textContent.trim();
+                    clone.style.opacity = '0.6';
+                    navPanel.appendChild(clone);
                 }
-                navPanel.appendChild(clone);
             });
         }
         document.body.appendChild(navPanel);

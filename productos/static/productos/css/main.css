@@ -329,6 +329,12 @@ p, ul, ol, dl, table { margin-bottom: 1.5em; }
     color: #fff;
     margin-bottom: 0.5em;
     letter-spacing: 0.5px;
+    min-height: 1.8em;
+    line-height: 1.4;
+}
+
+.product-card .card-body .badge:empty {
+    visibility: hidden;
 }
 
 .product-card .card-body p {
@@ -676,6 +682,10 @@ table tbody tr:nth-child(2n+1) {
         padding: 0.8em 0;
         border-bottom: solid 1px rgba(255, 255, 255, 0.1);
         font-size: 1em;
+    }
+
+    #navPanel .link:hover {
+        color: #f35858;
     }
 }
 
